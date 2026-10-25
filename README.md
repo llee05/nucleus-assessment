@@ -321,15 +321,25 @@ backend code.
 ## Follow-up questions
 
 1.  How far were you able to get with the exercise?
+        With AI assistance, I was able to create a functional calculator using Python and Flask, with a HTML/CSS interface. It supports addition, subtraction, multiplication and division, including negative numbers, decimal inputs, and leading zeros.
+
 2.  What challenges did you encounter in the process?
+        Making the app itself was quite smooth. I guess the only challenge I faced was when I learned that GitHub Pages couldn't run the Flask backend.
 3.  If you were given unlimited time, what additional functionality
     would you include?
+        I would try to model a graphic calculator, as that was the most powerful handheld calculator I have personally used. Beyond the calculator functionality itself, I would try to investigate user interface / experience improvements.
 4.  If you used AI, please include all of your prompts and answer the
     following questions:
     -   What did the AI do well?
     -   What did the AI do poorly?
     -   For the places it did poorly, how did you change your approach
         to your prompts to improve its output?
+
+        AI helped turn the exercise into a manageable plan suited to my familiarity with Python. It generated the calculation function, built an interface around it, added tests and helped review edge cases. Working in stages made the changes easier to understand and assess.
+
+        The initial implementation missed the browser’s silent truncation of pasted inputs and did not explain rounding on the page.
+
+        I was able to detect these errors by requesting a focused review with minimal fixes.
 
 ------------------------------------------------------------------------
 
