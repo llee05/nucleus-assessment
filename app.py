@@ -1,7 +1,9 @@
-"""Calculation logic for the calculator's form submissions."""
+"""Calculator logic and a small Flask interface."""
 
 import re
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
+
+from flask import Flask, render_template, request
 
 
 def calculate(first_number: str, operation: str, second_number: str) -> str:
@@ -51,3 +53,34 @@ def calculate(first_number: str, operation: str, second_number: str) -> str:
     display = format(result, "f")
     # Strip fractional zeros only, so an integer such as 50 remains intact.
     return display.rstrip("0").rstrip(".") if "." in display else display
+
+
+app = Flask(__name__)
+
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    values = {"first_number": "", "operation": "add", "second_number": ""}
+    result = None
+    error = None
+    status = 200
+
+    if request.method == "POST":
+        values = {key: request.form.get(key, "") for key in values}
+        try:
+            result = calculate(
+                values["first_number"], values["operation"], values["second_number"]
+            )
+        except ValueError as exc:
+            error = str(exc)
+            status = 400
+
+    operations = {
+        "add": ("+", "Add"),
+        "subtract": ("−", "Subtract"),
+        "multiply": ("×", "Multiply"),
+        "divide": ("÷", "Divide"),
+    }
+    return render_template(
+        "index.html", values=values, result=result, error=error, operations=operations
+    ), status

@@ -3,7 +3,7 @@
 import unittest
 from decimal import ROUND_DOWN, getcontext, localcontext
 
-from app import calculate
+from app import app, calculate
 
 
 class CalculateTests(unittest.TestCase):
@@ -81,6 +81,71 @@ class CalculateTests(unittest.TestCase):
             self.assertEqual(calculate("2", "divide", "3"), "0." + "6" * 27 + "7")
             self.assertEqual(getcontext().prec, 2)
             self.assertEqual(getcontext().rounding, ROUND_DOWN)
+
+
+class InterfaceTests(unittest.TestCase):
+    def setUp(self):
+        app.config.update(TESTING=True)
+        self.client = app.test_client()
+
+    def test_initial_page_and_stylesheet(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Your answer will appear here.", response.text)
+        self.assertNotIn('id="result-value"', response.text)
+        with self.client.get("/static/style.css") as stylesheet:
+            self.assertEqual(stylesheet.status_code, 200)
+
+    def test_form_uses_calculation_logic_for_all_operations(self):
+        for operation, expected in (
+            ("add", "4.5"), ("subtract", "-1.5"),
+            ("multiply", "4.5"), ("divide", "0.5"),
+        ):
+            with self.subTest(operation=operation):
+                response = self.client.post("/", data={
+                    "first_number": "0001.50", "operation": operation, "second_number": "3",
+                })
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(f'>{expected}</output>', response.text)
+                self.assertIn('value="0001.50"', response.text)
+
+    def test_form_validation_errors(self):
+        for data, message in (
+            ({}, "Enter both numbers."),
+            ({"first_number": "7", "operation": "divide", "second_number": "0.0"},
+             "Cannot divide by zero."),
+            ({"first_number": "1", "operation": "power", "second_number": "2"},
+             "Choose a supported operation."),
+        ):
+            with self.subTest(data=data):
+                response = self.client.post("/", data=data)
+                self.assertEqual(response.status_code, 400)
+                self.assertIn(message, response.text)
+                self.assertIn('role="alert"', response.text)
+                self.assertNotIn('id="result-value"', response.text)
+
+    def test_errors_clear_after_correction_and_clear_link_resets(self):
+        self.client.post("/", data={
+            "first_number": "1", "operation": "divide", "second_number": "0",
+        })
+        corrected = self.client.post("/", data={
+            "first_number": "0.1", "operation": "add", "second_number": "0.2",
+        })
+        self.assertEqual(corrected.status_code, 200)
+        self.assertIn('>0.3</output>', corrected.text)
+        self.assertNotIn('role="alert"', corrected.text)
+        cleared = self.client.get("/")
+        self.assertNotIn('id="result-value"', cleared.text)
+        self.assertIn('placeholder="e.g. 12.5" value=""', cleared.text)
+
+    def test_submitted_values_are_html_escaped(self):
+        response = self.client.post("/", data={
+            "first_number": '<script>alert("x")</script>',
+            "operation": "add", "second_number": "1",
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertNotIn("<script>", response.text)
+        self.assertIn("&lt;script&gt;", response.text)
 
 
 if __name__ == "__main__":

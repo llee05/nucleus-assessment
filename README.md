@@ -1,5 +1,34 @@
 # Engineering Intern Interview Questions
 
+## Run the calculator
+
+From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m flask --app app run --debug
+```
+
+Open `http://127.0.0.1:5000`. Choose an operation, enter two numbers, and
+select **Calculate** or press Enter. **Clear all** resets the form. The
+interface supports negative numbers, decimals, and leading zeros, and
+preserves your inputs when a calculation needs correcting.
+
+The Flask route calls the existing `calculate()` function. Arithmetic
+uses Python's standard-library `Decimal` with 28 significant digits;
+long results may be rounded. No JavaScript or frontend build is required.
+
+Run the calculation and interface tests:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+See [CALCULATOR_DESIGN.md](CALCULATOR_DESIGN.md) for the design and scope.
+The original assessment and code-review answers follow below.
+
 ## Introduction
 
 Thank you for your interest in the Nucleus Security Engineering

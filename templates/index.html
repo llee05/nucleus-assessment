@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A simple calculator for everyday arithmetic.">
+    <meta name="theme-color" content="#193a30">
+    <title>Everyday Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="page">
+      <header class="brand">
+        <span class="brand-mark" aria-hidden="true">=</span>
+        <span>everyday<span class="brand-dot">.</span></span>
+      </header>
+
+      <div class="intro">
+        <p class="eyebrow">A LITTLE SPACE TO WORK THINGS OUT</p>
+        <h1>Calculator</h1>
+        <p>Add, subtract, multiply, or divide. We'll take it from here.</p>
+      </div>
+
+      <div class="calculator">
+        <form action="{{ url_for('index', _anchor='result') }}" method="post" class="calculator-form">
+          <div class="field">
+            <label for="first-number">First number</label>
+            <input id="first-number" name="first_number" type="text" inputmode="decimal"
+                   maxlength="32" required autocomplete="off" spellcheck="false"
+                   placeholder="e.g. 12.5" value="{{ values.first_number }}">
+          </div>
+
+          <fieldset class="operation-field">
+            <legend>Operation</legend>
+            <div class="operations">
+              {% for value, (symbol, label) in operations.items() %}
+              <div class="operation-option">
+                <input class="operation-input" type="radio" name="operation"
+                       id="operation-{{ value }}" value="{{ value }}" required
+                       {% if values.operation == value %}checked{% endif %}>
+                <label for="operation-{{ value }}">
+                  <span class="operation-symbol" aria-hidden="true">{{ symbol }}</span>
+                  <span class="operation-name">{{ label }}</span>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="second-number">Second number</label>
+            <input id="second-number" name="second_number" type="text" inputmode="decimal"
+                   maxlength="32" required autocomplete="off" spellcheck="false"
+                   placeholder="e.g. 3" value="{{ values.second_number }}">
+          </div>
+
+          <div class="actions">
+            <button type="submit">Calculate <span aria-hidden="true">↗</span></button>
+            <a class="clear-link" href="{{ url_for('index') }}">Clear all</a>
+          </div>
+        </form>
+
+        <section class="result-panel{% if error %} has-error{% endif %}" id="result"
+                 tabindex="-1" aria-labelledby="result-heading" aria-live="polite" aria-atomic="true">
+          <div class="result-header">
+            <h2 id="result-heading">{{ 'Something to check' if error else 'Your result' }}</h2>
+            <span class="result-mark" aria-hidden="true">=</span>
+          </div>
+
+          <div class="result-content">
+            {% if error %}
+              <p class="error-message" role="alert">{{ error }}</p>
+              <p class="result-hint">Update your numbers or operation and try again.</p>
+            {% elif result is not none %}
+              <p class="expression">{{ values.first_number }} {{ operations[values.operation][0] }} {{ values.second_number }}</p>
+              <output class="result-value" id="result-value" for="first-number second-number">{{ result }}</output>
+            {% else %}
+              <span class="empty-result" aria-hidden="true">—</span>
+              <p class="result-hint">Your answer will appear here.<br>Start with two numbers.</p>
+            {% endif %}
+          </div>
+
+          <p class="result-footer"><span aria-hidden="true">✳</span> A little less mental math.</p>
+        </section>
+      </div>
+
+      <p class="keyboard-hint">Press <kbd>Enter</kbd> to calculate. Clear all to start fresh.</p>
+    </main>
+  </body>
+</html>
