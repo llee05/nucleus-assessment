@@ -138,6 +138,27 @@ class InterfaceTests(unittest.TestCase):
         self.assertNotIn('id="result-value"', cleared.text)
         self.assertIn('placeholder="e.g. 12.5" value=""', cleared.text)
 
+    def test_overlong_operands_are_rejected_and_preserved_for_correction(self):
+        overlong = "0" * 32 + "1"
+        for field in ("first_number", "second_number"):
+            with self.subTest(field=field):
+                data = {"first_number": "1", "operation": "add", "second_number": "1"}
+                data[field] = overlong
+                response = self.client.post("/", data=data)
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("Use at most 32 characters per number.", response.text)
+                self.assertIn(f'value="{overlong}"', response.text)
+                self.assertNotIn('id="result-value"', response.text)
+
+    def test_rounded_result_is_accompanied_by_precision_notice(self):
+        response = self.client.post("/", data={
+            "first_number": "12345678901234567890123456789",
+            "operation": "add", "second_number": "0",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('>12345678901234567890123456790</output>', response.text)
+        self.assertIn("Results rounded to 28 significant digits.", response.text)
+
     def test_submitted_values_are_html_escaped(self):
         response = self.client.post("/", data={
             "first_number": '<script>alert("x")</script>',

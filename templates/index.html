@@ -26,7 +26,7 @@
           <div class="field">
             <label for="first-number">First number</label>
             <input id="first-number" name="first_number" type="text" inputmode="decimal"
-                   maxlength="32" required autocomplete="off" spellcheck="false"
+                   required autocomplete="off" spellcheck="false"
                    placeholder="e.g. 12.5" value="{{ values.first_number }}">
           </div>
 
@@ -50,7 +50,7 @@
           <div class="field">
             <label for="second-number">Second number</label>
             <input id="second-number" name="second_number" type="text" inputmode="decimal"
-                   maxlength="32" required autocomplete="off" spellcheck="false"
+                   required autocomplete="off" spellcheck="false"
                    placeholder="e.g. 3" value="{{ values.second_number }}">
           </div>
 
@@ -73,14 +73,14 @@
               <p class="result-hint">Update your numbers or operation and try again.</p>
             {% elif result is not none %}
               <p class="expression">{{ values.first_number }} {{ operations[values.operation][0] }} {{ values.second_number }}</p>
-              <output class="result-value" id="result-value" for="first-number second-number">{{ result }}</output>
+              <output class="result-value" id="result-value" for="first-number second-number" aria-describedby="precision-note">{{ result }}</output>
             {% else %}
               <span class="empty-result" aria-hidden="true">—</span>
               <p class="result-hint">Your answer will appear here.<br>Start with two numbers.</p>
             {% endif %}
           </div>
 
-          <p class="result-footer"><span aria-hidden="true">✳</span> A little less mental math.</p>
+          <p class="result-footer" id="precision-note">Results rounded to 28 significant digits.</p>
         </section>
       </div>
 
